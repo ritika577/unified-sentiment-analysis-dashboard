@@ -57,7 +57,7 @@ def get_video_comments(video_id, video_title, max_results=50):
             "post_neg_sentiment": video_title_sentiment["neg"],
             "post_neu_sentiment": video_title_sentiment["neu"],
             "post_compound": video_title_sentiment["compound"],
-            "comment":comment,
+            "comment":comment[:100],
             "comment_pos_sentiment": sentiment["pos"],
             "comment_neg_sentiment": sentiment["neg"],
             "comment_neu_sentiment": sentiment["neu"],
