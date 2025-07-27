@@ -1,4 +1,4 @@
-name: ⏰ Daily Reddit Sentiment Data Update
+name: ⏰ Daily News Sentiment Data Update
 
 on:
   schedule:

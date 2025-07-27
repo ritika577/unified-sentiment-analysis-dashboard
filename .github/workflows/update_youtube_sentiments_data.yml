@@ -1,4 +1,4 @@
-name: ⏰ Daily Reddit Sentiment Data Update
+name: ⏰ Daily Youtube Sentiment Data Update
 
 on:
   schedule:
