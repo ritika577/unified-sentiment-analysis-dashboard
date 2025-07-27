@@ -29,7 +29,7 @@ def analyze_sentiment(text):
     return analyzer.polarity_scores(text)
 
 # Apply sentiment
-for article in articles[:50]:
+for article in articles[:100]:
     headline = article['title']
     sentiment = analyze_sentiment(headline)
     print(f"📰 {headline}")
