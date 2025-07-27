@@ -1,8 +1,10 @@
 from googleapiclient.discovery import build
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import os
+from db_connection import insert_sentiment_data
 import pandas as pd
 from dotenv import load_dotenv
-load_dotenv()
+# load_dotenv()
 
 # Initialize YouTube API
 api_key = os.getenv("YOUTUBE_API_KEY")
@@ -11,7 +13,7 @@ youtube = build("youtube", "v3", developerKey=api_key)
 # Initialize Sentiment Analyzer
 analyzer = SentimentIntensityAnalyzer()
 
-def get_trending_videos(region_code="IN", max_results=5):
+def get_trending_videos(region_code="IN", max_results=10):
     request = youtube.videos().list(
         part="snippet,statistics",
         chart="mostPopular",
@@ -32,10 +34,11 @@ def get_trending_videos(region_code="IN", max_results=5):
         })
     return videos
 
-
+data=[]
 
 # Fetch top-level comments for a video
-def get_video_comments(video_id, max_results=50):
+def get_video_comments(video_id, video_title, max_results=50):
+    video_title_sentiment = analyzer.polarity_scores(video_title)
     comments = []
     request = youtube.commentThreads().list(
         part="snippet",
@@ -48,18 +51,28 @@ def get_video_comments(video_id, max_results=50):
     for item in response.get("items", []):
         comment = item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
         sentiment = analyzer.polarity_scores(comment)
-        comments.append({
-            "comment": comment,
-            "compound": sentiment["compound"],
-            "pos": sentiment["pos"],
-            "neu": sentiment["neu"],
-            "neg": sentiment["neg"]
+        data.append({
+            "post_title":video_title,
+            "post_pos_sentiment": video_title_sentiment["pos"],
+            "post_neg_sentiment": video_title_sentiment["neg"],
+            "post_neu_sentiment": video_title_sentiment["neu"],
+            "post_compound": video_title_sentiment["compound"],
+            "comment":comment,
+            "comment_pos_sentiment": sentiment["pos"],
+            "comment_neg_sentiment": sentiment["neg"],
+            "comment_neu_sentiment": sentiment["neu"],
+            "comment_compound": sentiment["compound"], 
+            "source_platform": "youtube"  # Could also be 'reddit', 'youtube'
         })
-    return comments
-videos=get_trending_videos(region_code="IN", max_results=5)
+
+
+
+videos=get_trending_videos(region_code="IN", max_results=50)
 
 for video in videos:
     print(f"\n📹 {video['title']}")
-    comments = get_video_comments(video['video_id'])
+    comments = get_video_comments(video['video_id'], video['title'])
     df = pd.DataFrame(comments)
     print(df.head())
+
+insert_sentiment_data(data)
