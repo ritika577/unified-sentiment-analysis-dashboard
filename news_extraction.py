@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 # load_dotenv()
 
-API_KEY = os.get("NEWS_API_KEY")  # replace with your key
+API_KEY = os.getenv("NEWS_API_KEY")  # replace with your key
 
 def get_top_news(country='India'):
     url = f"https://newsapi.org/v2/everything?q={country}&language=en&sortBy=popularity&apiKey={API_KEY}"
