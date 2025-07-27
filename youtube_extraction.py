@@ -1,9 +1,11 @@
 from googleapiclient.discovery import build
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize YouTube API
-api_key = "AIzaSyCb7OoelYbdN8JYozO2OueHjUmlkOTacAM"
+api_key = os.getenv("YOUTUBE_API_KEY")
 youtube = build("youtube", "v3", developerKey=api_key)
 
 # Initialize Sentiment Analyzer
