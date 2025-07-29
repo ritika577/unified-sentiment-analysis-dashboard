@@ -34,7 +34,7 @@ for post in subreddit.hot(limit=200):
         "post_neg_sentiment": post_sent['neg'],
         "post_neu_sentiment": post_sent['neu'],
         "post_compound": post_sent['compound'],
-        "comment":comment.body[200:],
+        "comment":comment.body[100:],
         "comment_pos_sentiment": comment_sent['pos'],
         "comment_neg_sentiment": comment_sent['neg'],
         "comment_neu_sentiment": comment_sent['neu'],
