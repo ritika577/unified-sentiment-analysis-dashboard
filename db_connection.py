@@ -1,20 +1,45 @@
 import psycopg2
 from psycopg2.extras import execute_values
 from psycopg2.extras import execute_batch
-from datetime import datetime
+from datetime import datetime, timedelta
+import pandas as pd
 import os
+import atexit
+import streamlit as st
 from dotenv import load_dotenv
-# load_dotenv()
-# ✅ Set up connection globally or pass it in
-conn = psycopg2.connect(
+load_dotenv()
+
+conn=None
+def get_connection():
+    global conn
+    if not conn or conn.closed:
+        conn = psycopg2.connect(
             user=os.getenv("USER"),
             password=os.getenv("PASSWORD"),
             host=os.getenv("HOST"),
             port=os.getenv("PORT"),
             dbname=os.getenv("DBNAME")
         )
+    return conn
+
+def get_streamlit_conn():
+    global conn
+    if 'db_conn' not in st.session_state:    
+        conn = psycopg2.connect(
+            user=os.getenv("USER"),
+            password=os.getenv("PASSWORD"),
+            host=os.getenv("HOST"),
+            port=os.getenv("PORT"),
+            dbname=os.getenv("DBNAME")
+        )
+        st.session_state['db_conn'] = conn
+        # Register close on exit
+        atexit.register(lambda: conn.close())
+    return st.session_state['db_conn']
+
 
 def insert_sentiment_data(data):
+    conn = get_connection()
     with conn.cursor() as cursor:
         query = """
         INSERT INTO platform_sentiments (
@@ -39,3 +64,33 @@ def insert_sentiment_data(data):
         print("✅ Insert successful or conflict skipped.")
         cursor.close()
         conn.close()
+
+def fetch_filtered_data(source_platform=None, start_date=None, end_date=None):
+    conn = get_streamlit_conn()
+    
+     # SQL query with parameter placeholders
+    if source_platform:
+        query = """
+            SELECT *
+            FROM platform_sentiments
+            WHERE source_platform = %s AND created_at between %s and %s
+            ORDER BY created_at DESC;
+        """
+        params = (source_platform, start_date,end_date)
+    else:
+        query = """
+            SELECT *
+            FROM platform_sentiments
+            WHERE created_at between %s and %s
+            ORDER BY created_at DESC;
+        """
+        params = (start_date,end_date)
+
+
+
+    df = pd.read_sql(query, conn, params=params)
+    return df
+
+   
+
+
