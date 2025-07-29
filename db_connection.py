@@ -53,7 +53,7 @@ def insert_sentiment_data(data):
             %(source_platform)s,
             CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
-       ON CONFLICT ON CONSTRAINT unique_post_comment_v2 DO NOTHING;
+       ON CONFLICT ON CONSTRAINT unique_post_comment_v2_unique DO NOTHING;
 
         """
 
