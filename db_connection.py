@@ -1,13 +1,11 @@
 import psycopg2
-from psycopg2.extras import execute_values
 from psycopg2.extras import execute_batch
-from datetime import datetime, timedelta
 import pandas as pd
 import os
 import atexit
 import streamlit as st
 from dotenv import load_dotenv
-load_dotenv()
+# load_dotenv()
 
 conn=None
 def get_connection():
@@ -42,7 +40,7 @@ def insert_sentiment_data(data):
     conn = get_connection()
     with conn.cursor() as cursor:
         query = """
-        INSERT INTO platform_sentiments (
+        INSERT INTO platform_sentiments_v2 (
             post_title, comment, post_compound, comment_compound,
             post_pos_sentiment, post_neg_sentiment, post_neu_sentiment,
             comment_pos_sentiment, comment_neg_sentiment, comment_neu_sentiment,
@@ -72,7 +70,7 @@ def fetch_filtered_data(source_platform=None, start_date=None, end_date=None):
     if source_platform:
         query = """
             SELECT *
-            FROM platform_sentiments
+            FROM platform_sentiments_v2
             WHERE source_platform = %s AND created_at between %s and %s
             ORDER BY created_at DESC;
         """
@@ -80,7 +78,7 @@ def fetch_filtered_data(source_platform=None, start_date=None, end_date=None):
     else:
         query = """
             SELECT *
-            FROM platform_sentiments
+            FROM platform_sentiments_v2
             WHERE created_at between %s and %s
             ORDER BY created_at DESC;
         """
