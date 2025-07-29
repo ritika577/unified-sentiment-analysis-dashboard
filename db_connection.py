@@ -69,24 +69,51 @@ def fetch_filtered_data(source_platform=None, start_date=None, end_date=None):
      # SQL query with parameter placeholders
     if source_platform:
         query = """
-            SELECT *
+            SELECT
+            post_title,
+            post_pos_sentiment,
+            post_neg_sentiment,
+            post_neu_sentiment,
+            post_compound,
+            comment,
+            comment_pos_sentiment,
+            comment_neg_sentiment,
+            comment_neu_sentiment,
+            comment_compound,
+            created_at,
+            updated_at,
+            source_platform
             FROM platform_sentiments_v2
-            WHERE source_platform = %s AND created_at between %s and %s
+            WHERE source_platform = %s AND created_at between %s::timestamp and (%s::timestamp + time '23:59:59')
             ORDER BY created_at DESC;
         """
         params = (source_platform, start_date,end_date)
     else:
         query = """
-            SELECT *
+            SELECT
+            post_title,
+            post_pos_sentiment,
+            post_neg_sentiment,
+            post_neu_sentiment,
+            post_compound,
+            comment,
+            comment_pos_sentiment,
+            comment_neg_sentiment,
+            comment_neu_sentiment,
+            comment_compound,
+            created_at,
+            updated_at,
+            source_platform
             FROM platform_sentiments_v2
-            WHERE created_at between %s and %s
+            WHERE created_at between %s::timestamp and (%s::timestamp + time '23:59:59')
             ORDER BY created_at DESC;
         """
         params = (start_date,end_date)
 
 
-
+    print("Executing query:", query)
     df = pd.read_sql(query, conn, params=params)
+    print(df.head(100))
     return df
 
    
