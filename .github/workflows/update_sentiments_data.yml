@@ -2,7 +2,7 @@ name: ⏰ Daily Sentiment Data Update
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # 9 AM UTC daily
+    - cron: '*/30 * * * *'  # 9 AM UTC daily
   workflow_dispatch:
 
 env:
