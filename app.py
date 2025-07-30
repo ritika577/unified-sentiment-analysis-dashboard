@@ -5,7 +5,7 @@ from datetime import datetime,timedelta
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from db_connection import fetch_filtered_data
-load_dotenv()
+# load_dotenv()
 
 
 # 🧠 Aggregate data for graph

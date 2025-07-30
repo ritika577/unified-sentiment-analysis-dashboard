@@ -1,6 +1,7 @@
 from googleapiclient.discovery import build
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import os
+from googleapiclient.errors import HttpError
 from db_connection import insert_sentiment_data
 import pandas as pd
 from dotenv import load_dotenv
@@ -39,31 +40,37 @@ data=[]
 # Fetch top-level comments for a video
 def get_video_comments(video_id, video_title, max_results=50):
     video_title_sentiment = analyzer.polarity_scores(video_title)
-    comments = []
-    request = youtube.commentThreads().list(
-        part="snippet",
-        videoId=video_id,
-        maxResults=max_results,
-        textFormat="plainText"
-    )
-    response = request.execute()
+    try:
+        comments = []
+        request = youtube.commentThreads().list(
+            part="snippet",
+            videoId=video_id,
+            maxResults=max_results,
+            textFormat="plainText"
+        )
+        response = request.execute()
 
-    for item in response.get("items", []):
-        comment = item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
-        sentiment = analyzer.polarity_scores(comment)
-        data.append({
-            "post_title":video_title,
-            "post_pos_sentiment": video_title_sentiment["pos"],
-            "post_neg_sentiment": video_title_sentiment["neg"],
-            "post_neu_sentiment": video_title_sentiment["neu"],
-            "post_compound": video_title_sentiment["compound"],
-            "comment":comment[:100],
-            "comment_pos_sentiment": sentiment["pos"],
-            "comment_neg_sentiment": sentiment["neg"],
-            "comment_neu_sentiment": sentiment["neu"],
-            "comment_compound": sentiment["compound"], 
-            "source_platform": "youtube"  # Could also be 'reddit', 'youtube'
-        })
+        for item in response.get("items", []):
+            comment = item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
+            sentiment = analyzer.polarity_scores(comment)
+            data.append({
+                "post_title":video_title,
+                "post_pos_sentiment": video_title_sentiment["pos"],
+                "post_neg_sentiment": video_title_sentiment["neg"],
+                "post_neu_sentiment": video_title_sentiment["neu"],
+                "post_compound": video_title_sentiment["compound"],
+                "comment":comment[:100],
+                "comment_pos_sentiment": sentiment["pos"],
+                "comment_neg_sentiment": sentiment["neg"],
+                "comment_neu_sentiment": sentiment["neu"],
+                "comment_compound": sentiment["compound"], 
+                "source_platform": "youtube"  # Could also be 'reddit', 'youtube'
+            })
+    except HttpError as e:
+        if 'commentsDisabled' in str(e):
+            print(f"Comments are disabled for video ID: {video_id}. Skipping.")
+        else:
+            raise
 
 
 
